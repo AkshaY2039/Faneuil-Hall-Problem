@@ -1,0 +1,409 @@
+<html>
+	
+	<head>
+		<title>Faneuil Hall</title>
+		<script type="text/javascript" src="jquery.min.js"></script>
+
+		<style type="text/css">
+			
+			body{
+				width:100%;
+				overflow-x: hidden;
+			}
+
+			.judge{
+				width:100px;
+				height: 100px;
+				position: absolute;
+				top:50px;
+				right:-200px;
+				transition: right 1s;
+				transition-timing-function: ease-out;
+			}
+
+			.checkedIn{
+				position: absolute;
+				top:310px;
+				left:0px;
+				display: inline-flex;
+				overflow-x: auto;
+				width:100%;
+			}
+
+			.immgImg{
+				background: transparent;
+			}
+
+			.immigrants{
+				position: absolute;
+				top:450px;
+				left:0px;
+				display: inline-flex;
+				overflow-x: auto;
+				width:100%;
+			}
+			.swear{
+				position: absolute;
+				top:50px;
+				left:0px;
+				display: inline-flex;
+				overflow-x: auto;
+				width:35%;
+			}
+
+			figure{
+				margin:10;
+			}
+
+			figcaption{
+				text-align: center;
+			}
+			.spec{
+				position: absolute;
+				top:175px;
+				right:0px;
+				display: inline-flex;
+			}
+
+			.spectImage{
+				height:100px;
+				width:auto;
+			}
+			.court{
+				position: absolute;
+				top:0;
+				left:0;
+				width:100%;
+				height:200px;
+				background: #fe872b;
+			}
+
+			.judgeSentence{
+				position: absolute;
+				top:35px;
+				left:53%;
+				font-size: 40px;
+				font-family: sans-serif;
+				
+			}
+
+			.grey{
+				color:#444;
+			}
+			.white{
+				color:#FFF;
+			}
+			.tags{
+				font-size: 30px;
+				font-family:sans-serif;
+				
+			}
+
+			.silver{
+				color:#888;
+			}
+			.red{
+				color:red;
+			}
+			#makeImmigrant{
+				position: absolute;
+				bottom:10px;
+				left:30px;
+			}
+
+			.notifyBox{
+				position: absolute;
+				top:30px;
+				left:30px;
+				font-size: 30px;
+				font-family: sans-serif;
+			}
+			#gavel{
+				opacity: :0;
+			}
+
+		</style>
+	</head>
+
+	<body>
+
+		
+		
+		<div class="court"></div>
+
+		<div class="notifyBox white"></div>
+
+		<div class="judgeSentence grey"></div>
+		<img src="judge.png" class="judge">
+		
+
+		<div class="swear" id="swear">
+			<div class="tags white">Swear / Get Certificate: </div>	
+		</div>		
+
+		<div class="spec"></div>
+
+		<div class="checkedIn">
+			<div class="tags silver">Checked In:</div>
+		</div>
+		<div class="immigrants">
+			<div class="tags silver" id="gate">Entry / Exit:</div>
+		</div>
+
+		<audio id="gavel">
+		  <source src="gavel.mp3" type="audio/mpeg">
+		Your browser does not support the audio element.
+		</audio>
+
+		<script>
+
+			var sCount = 0,iCount=0;
+
+			var judgeState = 0;
+
+			var swearingIn = 0;
+
+			var currentSwear = 0;
+
+			var intervalID;
+
+			function judgeAct(){
+				
+				var k = parseInt(Math.random()*10)%5 + 4;
+
+				if (judgeState == 0) {
+
+					setTimeout(enterJudge,k * 1300);
+					
+				}
+			}
+
+			function enterJudge(){
+
+				$("#gate").html("--Entry Blocked--: Judge is Inside");
+				$("#gate").addClass("red");
+				$("#gate").removeClass("silver");
+
+				$(".judge").css({"right":"47%"});
+
+
+				judgeState = 1;
+
+				setTimeout(confirmJudge,3000)
+			}
+
+			function exitJudge(){
+
+				$(".judge").css({"right":"-200px"});
+				judgeState = 0;
+				$("#gate").html("Entry / Exit");
+				$("#gate").addClass("silver");
+				$("#gate").removeClass("red");
+				judgeAct();
+
+			}
+
+			function confirmJudge(){
+
+				$("#gavel")[0].play();
+				$(".judgeSentence").html("Confirmed !");
+
+				setTimeout(function (){ $(".judgeSentence").empty(); } , 2000)
+
+				intervalID = setInterval(swearImmigrants, 3000);
+			}
+
+			function swearImmigrants(){
+
+				swearImmigrant(currentSwear);
+				currentSwear++;
+
+				if (currentSwear == iCount) {
+					clearInterval(intervalID);
+					console.log("Cleared");
+					$("#gavel")[0].play();
+					$(".judgeSentence").html("Concluded !");
+					setTimeout(function (){ $(".judgeSentence").empty(); } , 2000)
+					setTimeout(exitJudge,2000);
+					setTimeout(exitAllImmg,3000);
+				}
+			}
+
+			function notify(msg){
+
+				$(".notifyBox").html(msg);
+
+				setTimeout(function (){ $(".notifyBox").empty(); } , 2000)
+
+			}
+
+			function createImmigrant(){
+
+				if (judgeState === 0) {
+					var $figure = $(`<figure></figure>`)
+					var $caption = $(`<figcaption>Immigrant `+iCount+`</figcaption>`)
+					var $immigrant = $(`<img src="person.png"/>`);
+					$immigrant.attr("height","70px")
+					$immigrant.attr("width","70px")
+					$immigrant.attr("class","immgImg")
+					$figure.attr("id","immg"+iCount)
+					$figure.attr("class", "immg")
+					$caption.attr("id","immgCap"+iCount)
+
+					$(".immigrants").append($figure)
+					$($figure).append($immigrant)
+					$($figure).append($caption)
+
+					setTimeout(checkinImmigrant, 1500 , iCount)
+
+					iCount++;
+				}
+
+				else{
+					notify("Cannot enter , too late.")
+				}
+
+				return false
+			}
+
+			function checkinImmigrant(id){
+
+				
+				$("#immg"+id).detach().appendTo('.checkedIn')
+
+				//console.log($(".swear").children().length)
+
+				
+
+				//setTimeout(swearImmigrant, 1500 , id)
+			}
+
+			function swearImmigrant(id){
+				
+				$("#immg"+id).detach().appendTo('.swear')
+
+
+				setTimeout(function(){
+					$("#immg"+id).detach().appendTo('.checkedIn');
+					$("#immgCap"+id).append("<br><small class='silver'>Sweared In</small>")
+					
+				}, 1500)
+
+			}
+
+			function exitImmg(id){
+				$("#immg"+id).detach().appendTo('.immigrants');
+				$("#immgCap"+id).append("<br><small class='silver'>Leaving</small>")
+				setTimeout(function(){ $("#immg"+id).remove() }, 2000)
+			}
+
+			function exitAllImmg(){
+
+				for (var i = 0; i < iCount; i++) {
+					exitImmg(i);
+				}
+
+			}
+
+
+			function createSpec(){
+				var $figure = $(`<figure></figure>`)
+				var $caption = $(`<figcaption>Spectator `+sCount+`</figcaption>`)
+				var t = (parseInt(Math.random()*100)%3) + 1
+				var $spect = $('<img src="spec'+t+'.png"/>');
+				$figure.attr("id","spec"+sCount)
+				$figure.attr("class", "spect")
+				$caption.attr("id","specCap"+sCount)
+				$($spect).attr("class","spectImage")
+				
+
+				$(".spec").append($figure)
+				$($figure).append($spect)
+				$($figure).append($caption)
+
+				var k = 10 + parseInt(Math.random()*100)%20;
+
+				// console.log(k);
+
+				setTimeout(addSpecCap, k*1000,sCount )
+
+				setTimeout(removeSpec, k*1200,sCount)
+
+				sCount++;
+			}
+
+			function removeSpec(sC){
+				$("#spec"+sC).remove();
+					
+			}
+			function addSpecCap(sC){
+
+				$("#specCap"+sC).append("<br><small class='silver'>Leaving</small>")
+					
+			}
+
+			function newSpecAct(){
+				
+				if ( $(".spec").children().length < 7 && judgeState == 0) {
+
+					createSpec();
+				}
+			}
+
+
+			function newImmgAct(){
+					
+				console.log($(".checkedIn").children().length)
+
+				if ( $(".checkedIn").children().length < 9 && judgeState == 0) {
+
+					createImmigrant();
+				}
+			}
+
+
+
+			//setTimeout(createSpec, 1500)
+			
+			
+			judgeAct();
+			setInterval(newSpecAct, 1000);
+			setInterval(newImmgAct, 1000);
+
+
+			//setTimeout(enterJudge, 3000)
+			//setTimeout(exitJudge, 5500)
+			//setTimeout(confirmJudge, 4000)
+
+
+			/*
+				Every 0.5 sec one of 3 things will happen
+
+				0. Judge Activity
+					enter,
+					confirm,
+					leave,
+				1. Immigrant Activity
+					enter, 
+					checkIn, 
+					sitDown, 
+					swear, 
+					getCertificate ,
+					leave
+				2. Spectator Acitivity
+					enter,
+					spectate,
+					leave
+
+					While the judge is in the building, no one may enter and immigrants may not leave.
+
+					The judge can not confirm until all immigrants who have invoked enter have also invoked checkIn.
+
+					Immigrants can not getCertificate until the judge has executed confirm.
+			*/
+
+
+		</script>
+	</body>
+
+</html>
